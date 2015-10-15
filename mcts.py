@@ -24,7 +24,7 @@ from search_structure import Node
 __author__ = "Kim Bauters"
 
 
-# provide a named tuple for easy access to all information relevant to available actions after the search completed
+# provide a named tuple for easy access to all information relevant to available actions after the search finishes
 ActInfo = namedtuple('ActInfo', 'action reward visits')
 
 
