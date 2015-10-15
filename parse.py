@@ -15,7 +15,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import graken, Parser
 
 
-__version__ = (2015, 6, 26, 8, 40, 35, 4)
+__version__ = (2015, 9, 30, 9, 46, 4, 2)
 
 __all__ = [
     'PPDDLsubParser',
