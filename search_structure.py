@@ -100,14 +100,14 @@ class Node:
                   str('%0.2f' % self.utility) + ',' + str(self.visits) + '"]\n'  # add the label to identify its state
         next_id = 0
         for key, child in self.children.items():
-            (action, _) = key  # extract the action out of the (action, effect) pair
+            (action, effect) = key  # extract the action out of the (action, effect) pair
             if action in self.tried_actions:  # if this is an action we actually performed, not just simulated: show it
                 output += 'action_node' + str(name) + action.name
                 output += '[label="' + action.name + '", shape=box]\n'
                 child_node_name = name + '_' + str(next_id)
                 output += child.__graphviz(child_node_name)
                 output += 'action_node' + str(name) + action.name + ' -- '
-                output += 'decision_node' + str(child_node_name) + ' [style=dashed]\n'
+                output += 'decision_node' + str(child_node_name) + ' [style=dashed, label="' + str(effect) + '"]\n'
                 next_id += 1
         for action, info in self.tried_actions.items():
             reward, visits = info
