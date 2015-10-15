@@ -1,11 +1,11 @@
 from random import choice
-from math import log, sqrt
+import logging as log
+import math
 
 from search_structure import Node
 from pdo_parser import PDOParser
 from mcts import mcts
 
-verbose = False
 
 my_input = """
 (define (problem example-maffia)
@@ -62,10 +62,13 @@ my_input = """
 )"""
 
 
+# create a PDO parser ...
 my_parser = PDOParser()
+# ... and parse the input using it.
 my_problem = my_parser.process_input(my_input)
 
 
+# generator function to create functions that will return False after a number of allowed iterations
 def iteration_budget(allowed_iterations):
 
     def inner_iteration_budget(iterations):
@@ -73,19 +76,20 @@ def iteration_budget(allowed_iterations):
     return inner_iteration_budget
 
 
+# generator function to create functions that will return False after a set amount of seconds have passed
 def timed_budget(allowed_secs):
     from time import perf_counter
     start_time = None
 
     def inner_timed_budget(_):
-        nonlocal start_time
-        if not start_time:
-            start_time = perf_counter()
-        if perf_counter() - start_time > allowed_secs:
-            start_time = None
-            return False
+        nonlocal start_time  # use the start time in the closure
+        if not start_time:  # if it hasn't been set ...
+            start_time = perf_counter()  # set it to now
+        if perf_counter() - start_time > allowed_secs:  # check if the allowed have been reached
+            start_time = None  # if so, reset the start_time to None for a next run
+            return False  # and return False to indicate the iteration should stop
         else:
-            return True
+            return True  # continue until the allotted number of seconds is reached
     return inner_timed_budget
 
 
@@ -96,12 +100,12 @@ def my_expand_action(node):
 
 def my_select_action(node):
     """ Select the best action, by taking the action that has 
-        the best average reward vs the least number of explorations. """
+        the best average reward vs the least number of explorations.
+        This is based on the UCB1 mechanism for selecting the best action. """
     best_action = (None, 0)
-    if verbose:
-        print("  choosing 1 action out of " + str(len(node.tried_actions)))
+    log.info("  choosing 1 action out of " + str(len(node.tried_actions)))
     for action, (action_reward, visits) in node.tried_actions.items():
-        ucb1 = (1/sqrt(2))*sqrt(log(node.visits)/visits)+(action_reward/visits)
+        ucb1 = (1/math.sqrt(2)) * math.sqrt(math.log(node.visits)/visits)+(action_reward/visits)
         if not best_action[0] or ucb1 > best_action[1]:
             best_action = (action, ucb1)
     return best_action[0]
@@ -112,9 +116,12 @@ def my_rollout_action(node):
     return choice(node.untried_actions)
 
 
+# initialise a basic root, which identifies only the problem space as well as the initial state
 root = Node(my_problem, None, None, None, my_problem.init)
+# initialise the reward to 0
 reward = 0
 
+# trigger the actual MCTS search by setting all desired parameters
 while not my_problem.goal_reached(root.state):
     my_action = mcts(root.state,
                      my_problem,
@@ -122,13 +129,14 @@ while not my_problem.goal_reached(root.state):
                      50,
                      select_action=my_select_action,
                      verbose=False)
-    print(str(root.state) + " " + my_action.name)
-    root = root.perform_action(my_action)
-    reward += root.effect.reward
-reward += my_problem.goal_reward
-print(root.state)
-print(reward)
+    print(str(root.state) + " " + my_action.name)  # print information about the current state and best next action
+    root = root.perform_action(my_action)  # simulate the execution of this best next action
+    reward += root.effect.reward  # for the probabilistic case: keep track of any intermediate rewards
+reward += my_problem.goal_reward  # for the probabilistic case: keep track of the reward of the goal
+print(root.state)  # display information on the final state to verify we reached the goal
+print(reward)  # display information on the reward accumulated during this run
 
+# # used for debugging and illustratign the graphviz system
 # my_action = mcts(root.state,
 #                  my_problem,
 #                  timed_budget(1),  #iteration_budget(350),
