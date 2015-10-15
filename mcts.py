@@ -18,15 +18,21 @@ Intuitively, PROST works by dividing the tree in layers, where one of the
 """
 import logging as log
 from random import choice
+from collections import namedtuple
 from search_structure import Node
 
 __author__ = "Kim Bauters"
+
+
+# provide a named tuple for easy access to all information relevant to available actions after the search completed
+ActInfo = namedtuple('ActInfo', 'action reward visits')
 
 
 def mcts(root_state, problem, budget, horizon,
          select_action=lambda node: choice(list(node.tried_actions.keys())),
          expand_action=lambda node: choice(node.untried_actions),
          rollout_action=lambda node: choice(node.untried_actions),
+         select_best=lambda acts: sorted(acts, key=lambda act: act.reward/act.visits, reverse=True)[0].action,
          *, discounting=0.9, verbose=False, graphviz=False):
     """
     :param root_state: the initial state from which to start the search
@@ -95,6 +101,8 @@ def mcts(root_state, problem, budget, horizon,
     if graphviz:
         print(root.get_graphviz())
 
-    actions = [(action, reward, visits) for action, (reward, visits) in root.tried_actions.items()]
-    actions = sorted(actions, key=lambda action: action[1]/action[2], reverse=True)
-    return actions[0][0]
+    # collect all the actions available in the root along with any information used for choosing
+    actions = [ActInfo(action, reward, visits) for
+               action, (reward, visits) in root.tried_actions.items()]
+
+    return select_best(actions)
