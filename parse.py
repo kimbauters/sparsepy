@@ -15,7 +15,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import graken, Parser
 
 
-__version__ = (2015, 9, 30, 9, 46, 4, 2)
+__version__ = (2015, 10, 23, 9, 14, 47, 4)
 
 __all__ = [
     'PPDDLsubParser',
@@ -79,7 +79,7 @@ class PPDDLsubParser(Parser):
     @graken()
     def _init_(self):
         self._token('(:init ')
-        self._conjunction_()
+        self._negfreeconjunction_()
         self.ast['conjunction'] = self.last_node
         self._token(')')
 
@@ -289,6 +289,27 @@ class PPDDLsubParser(Parser):
         )
 
     @graken()
+    def _negfreeconjunction_(self):
+        with self._choice():
+            with self._option():
+                self._negfreeterm_()
+                self.ast.setlist('args', self.last_node)
+            with self._option():
+                self._token('(and ')
+
+                def block2():
+                    self._negfreeterm_()
+                self._closure(block2)
+                self.ast['args'] = self.last_node
+                self._token(')')
+            self._error('expecting one of: (and ')
+
+        self.ast._define(
+            ['args'],
+            ['args']
+        )
+
+    @graken()
     def _term_(self):
         with self._choice():
             with self._option():
@@ -296,6 +317,10 @@ class PPDDLsubParser(Parser):
             with self._option():
                 self._negation_()
             self._error('no available options')
+
+    @graken()
+    def _negfreeterm_(self):
+        self._predicate_()
 
     @graken()
     def _negation_(self):
@@ -391,7 +416,13 @@ class PPDDLsubSemantics(object):
     def conjunction(self, ast):
         return ast
 
+    def negfreeconjunction(self, ast):
+        return ast
+
     def term(self, ast):
+        return ast
+
+    def negfreeterm(self, ast):
         return ast
 
     def negation(self, ast):
