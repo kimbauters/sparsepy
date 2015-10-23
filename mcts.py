@@ -99,7 +99,8 @@ def mcts(root_state, problem, budget, horizon,
 
     log.info("search completed\n")
     if graphviz:
-        print(root.get_graphviz())
+        location = root.create_graphviz()
+        print("The Graphviz DOT file has been saved in " + str(location) + ".")
 
     # collect all the actions available in the root along with any information used for choosing
     actions = [ActInfo(action, reward, visits) for
