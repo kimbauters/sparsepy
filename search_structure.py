@@ -84,13 +84,15 @@ class Node:
                 node.visits += 1  # update the  number of visits to this node
             node = node.parent  # move to the parent node
 
-    def get_graphviz(self):
+    def create_graphviz(self, location="graphviz.dot"):
         """ Produce the contents for a Graphviz DOT file representing the search tree as starting from this node.
-        :return: the contents for a Graphviz DOT file """
+        :return: the location where the Graphviz DOT file has been saved """
         output = "graph sparsepy {\n"
         output += textwrap.indent(self.__graphviz(), "  ")
         output += "}"
-        return output
+        with open(location, 'w') as file:
+            file.write(output)
+        return location
 
     def __graphviz(self, name="0"):
         """ Internal method used in the creation of the Graphviz DOT file. This method will be called recursively,
