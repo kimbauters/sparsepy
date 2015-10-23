@@ -122,24 +122,24 @@ root = Node(my_problem, None, None, None, my_problem.init)
 reward = 0
 
 # trigger the actual MCTS search by setting all desired parameters
-while not my_problem.goal_reached(root.state):
-    my_action = mcts(root.state,
-                     my_problem,
-                     timed_budget(0.05),
-                     50,
-                     select_action=my_select_action,
-                     verbose=False)
-    print(str(root.state) + " " + my_action.name)  # print information about the current state and best next action
-    root = root.perform_action(my_action)  # simulate the execution of this best next action
-    reward += root.effect.reward  # for the probabilistic case: keep track of any intermediate rewards
-reward += my_problem.goal_reward  # for the probabilistic case: keep track of the reward of the goal
-print(root.state)  # display information on the final state to verify we reached the goal
-print(reward)  # display information on the reward accumulated during this run
+# while not my_problem.goal_reached(root.state):
+#     my_action = mcts(root.state,
+#                      my_problem,
+#                      timed_budget(0.05),
+#                      50,
+#                      select_action=my_select_action,
+#                      verbose=False)
+#     print(str(root.state) + " " + my_action.name)  # print information about the current state and best next action
+#     root = root.perform_action(my_action)  # simulate the execution of this best next action
+#     reward += root.effect.reward  # for the probabilistic case: keep track of any intermediate rewards
+# reward += my_problem.goal_reward  # for the probabilistic case: keep track of the reward of the goal
+# print(root.state)  # display information on the final state to verify we reached the goal
+# print(reward)  # display information on the reward accumulated during this run
 
-# # used for debugging and illustratign the graphviz system
-# my_action = mcts(root.state,
-#                  my_problem,
-#                  timed_budget(1),  #iteration_budget(350),
-#                  50,
-#                  select_action=my_select_action,
-#                  graphviz=True)
+# used for debugging and illustratign the graphviz system
+my_action = mcts(root.state,
+                 my_problem,
+                 timed_budget(1),  #iteration_budget(350),
+                 50,
+                 select_action=my_select_action,
+                 graphviz=True)
