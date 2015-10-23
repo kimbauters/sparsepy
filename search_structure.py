@@ -86,6 +86,7 @@ class Node:
 
     def create_graphviz(self, location="graphviz.dot"):
         """ Produce the contents for a Graphviz DOT file representing the search tree as starting from this node.
+        :param location: the location of where to save the generated file.
         :return: the location where the Graphviz DOT file has been saved """
         output = "graph sparsepy {\n"
         output += textwrap.indent(self.__graphviz(), "  ")
